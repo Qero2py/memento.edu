@@ -8,9 +8,9 @@ const local = !url || /@(localhost|127\.0\.0\.1)/.test(url);
 const options = {
   ssl: local ? (false as const) : ("require" as const),
   prepare: false, // required for Supabase's pooled (transaction mode) connections
-  max: process.env.VERCEL ? 1 : 10,
+  max: process.env.VERCEL ? 3 : 10,
   idle_timeout: 20,
-  connect_timeout: 15,
+  connect_timeout: 6, // fail with a readable error before the host's own timeout (504)
   onnotice: () => {},
   // Return timestamps as ISO strings so they can be passed around and compared easily.
   types: {

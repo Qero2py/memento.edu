@@ -9,6 +9,7 @@ export const metadata: Metadata = {
   description: "Remember what you learn. A calm learning management system.",
   icons: { icon: "/logo.png" },
 };
+export const maxDuration = 30;
 export const generateStaticParams = () => locales.map((locale) => ({ locale }));
 
 export default async function RootLayout({ children, params }: { children: ReactNode; params: Promise<{ locale: string }> }) {

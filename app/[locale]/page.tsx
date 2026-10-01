@@ -5,6 +5,8 @@ import { publicCourses } from "@/lib/queries";
 import { SiteFooter, SiteHeader } from "@/components/Site";
 import { Icon, Trail } from "@/components/ui";
 
+export const dynamic = "force-dynamic";
+
 export default async function Landing({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   if (!isLocale(locale)) notFound();

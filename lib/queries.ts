@@ -1,24 +1,28 @@
+import { cache } from "react";
 import { sql, type Row } from "./db";
 export type { Row };
 
+// One query returns every enrolled course with its totals (instead of several queries per course).
+const coursesWithStats = async (userId: number, only?: number): Promise<Row[]> => {
+  const rows = await sql<Row[]>`select c.*,
+    (select count(*) from course_sessions s where s.course_id = c.id)::int as session_count,
+    ((select count(*) from course_sessions s where s.course_id = c.id)
+     + (select count(*) from materials m join course_sessions s on s.id = m.session_id where s.course_id = c.id)
+     + (select count(*) from practicums x where x.course_id = c.id))::int as total,
+    ((select count(*) from progress p join course_sessions s on p.kind = 'session' and p.ref_id = s.id where p.user_id = ${userId} and s.course_id = c.id)
+     + (select count(*) from progress p join materials m on p.kind = 'material' and p.ref_id = m.id join course_sessions s on s.id = m.session_id where p.user_id = ${userId} and s.course_id = c.id)
+     + (select count(*) from progress p join practicums x on p.kind = 'practicum' and p.ref_id = x.id where p.user_id = ${userId} and x.course_id = c.id))::int as done
+    from courses c join enrollments e on e.course_id = c.id and e.user_id = ${userId}
+    where ${only == null ? sql`true` : sql`c.id = ${only}`} order by c.id`;
+  return rows.map((c) => ({ ...c, percent: c.total ? Math.round((c.done / c.total) * 100) : 0 }));
+};
+
 export async function courseTotals(userId: number, courseId: number) {
-  const [t] = await sql<Row[]>`select
-    (select count(*) from course_sessions where course_id = ${courseId})::int +
-    (select count(*) from materials m join course_sessions s on s.id = m.session_id where s.course_id = ${courseId})::int +
-    (select count(*) from practicums where course_id = ${courseId})::int as n`;
-  const [d] = await sql<Row[]>`select count(*)::int as n from progress p where p.user_id = ${userId} and (
-    (p.kind = 'session' and p.ref_id in (select id from course_sessions where course_id = ${courseId})) or
-    (p.kind = 'material' and p.ref_id in (select m.id from materials m join course_sessions s on s.id = m.session_id where s.course_id = ${courseId})) or
-    (p.kind = 'practicum' and p.ref_id in (select id from practicums where course_id = ${courseId})))`;
-  const total = t.n as number, done = d.n as number;
-  return { total, done, percent: total ? Math.round((done / total) * 100) : 0 };
+  const [c] = await coursesWithStats(userId, courseId);
+  return c ? { total: c.total as number, done: c.done as number, percent: c.percent as number } : { total: 0, done: 0, percent: 0 };
 }
 
-export async function myCourses(userId: number): Promise<Row[]> {
-  const rows = await sql<Row[]>`select c.*, (select count(*) from course_sessions where course_id = c.id)::int as session_count
-    from courses c join enrollments e on e.course_id = c.id where e.user_id = ${userId} order by c.id`;
-  return Promise.all(rows.map(async (c) => ({ ...c, ...(await courseTotals(userId, c.id)) })));
-}
+export const myCourses = cache((userId: number): Promise<Row[]> => coursesWithStats(userId));
 
 export const publicCourses = (): Promise<Row[]> =>
   sql<Row[]>`select c.*, (select count(*) from course_sessions where course_id = c.id)::int as session_count from courses c order by c.id`;
@@ -81,9 +85,14 @@ export const notificationsFor = (userId: number): Promise<Row[]> =>
   sql<Row[]>`select * from notifications where user_id = ${userId} order by created_at desc limit 6`;
 
 export async function nextSession(userId: number) {
-  for (const c of await myCourses(userId)) {
-    const cur = (await sessionsWithState(c.id, userId)).find((s) => s.state === "current");
-    if (cur) return { course: c, session: cur };
-  }
-  return null;
+  const [row] = await sql<Row[]>`select s.*, c.code as course_code, c.title_en as course_title_en, c.title_id as course_title_id
+    from course_sessions s join courses c on c.id = s.course_id
+    join enrollments e on e.course_id = c.id and e.user_id = ${userId}
+    where not exists (select 1 from progress p where p.user_id = ${userId} and p.kind = 'session' and p.ref_id = s.id)
+    order by c.id, s.num limit 1`;
+  if (!row) return null;
+  return {
+    session: row,
+    course: { code: row.course_code, title_en: row.course_title_en, title_id: row.course_title_id },
+  };
 }
