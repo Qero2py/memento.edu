@@ -1,4 +1,5 @@
 import { cache } from "react";
+import { unstable_cache } from "next/cache";
 import { sql, type Row } from "./db";
 export type { Row };
 
@@ -24,8 +25,15 @@ export async function courseTotals(userId: number, courseId: number) {
 
 export const myCourses = cache((userId: number): Promise<Row[]> => coursesWithStats(userId));
 
-export const publicCourses = (): Promise<Row[]> =>
-  sql<Row[]>`select c.*, (select count(*) from course_sessions where course_id = c.id)::int as session_count from courses c order by c.id`;
+// Same for every visitor, so cache it for 5 minutes instead of hitting the database on every page view.
+export const publicCourses = unstable_cache(
+  async (): Promise<Row[]> => {
+    const rows = await sql<Row[]>`select c.*, (select count(*) from course_sessions where course_id = c.id)::int as session_count from courses c order by c.id`;
+    return Array.from(rows);
+  },
+  ["public-courses"],
+  { revalidate: 300, tags: ["courses"] },
+);
 
 export async function getCourse(code: string): Promise<Row | undefined> {
   const [row] = await sql<Row[]>`select * from courses where code = ${code}`;
