@@ -5,6 +5,7 @@ import { requireUser } from "@/lib/auth";
 import { submitAssignment, toggleProgress } from "@/lib/actions";
 import type { Row } from "@/lib/queries";
 import { assignmentsFor, courseTotals, getCourse, isEnrolled, practicumsWithState, sessionsWithState } from "@/lib/queries";
+import SubmitButton from "@/components/SubmitButton";
 import { AssignmentStatus } from "@/components/Status";
 import { Icon, Progress, kindIcon } from "@/components/ui";
 
@@ -14,10 +15,10 @@ type Tab = (typeof TABS)[number];
 function Toggle({ done, action, label }: { done: boolean; action: () => Promise<void> | void; label: string }) {
   return (
     <form action={action}>
-      <button aria-pressed={done} aria-label={label} title={label}
+      <SubmitButton spinner={false} aria-pressed={done} aria-label={label} title={label}
         className={`grid h-7 w-7 place-items-center rounded-full border-2 transition-colors ${done ? "border-sage bg-sage text-white" : "border-line text-transparent hover:border-sage hover:text-sage-mid"}`}>
         <Icon name="check" className="h-4 w-4" />
-      </button>
+      </SubmitButton>
     </form>
   );
 }
@@ -99,7 +100,7 @@ export default async function CoursePage({ params, searchParams }: { params: Pro
                       ))}
                     </ul>
                     <form action={toggleProgress.bind(null, "session", s.id, path)} className="mt-4">
-                      <button className={`btn btn-sm ${done ? "btn-ghost" : "btn-primary"}`}>{t(done ? "session.undo" : "session.markdone")}</button>
+                      <SubmitButton className={`btn btn-sm ${done ? "btn-ghost" : "btn-primary"}`}>{t(done ? "session.undo" : "session.markdone")}</SubmitButton>
                     </form>
                   </div>
                 </details>
@@ -148,7 +149,7 @@ export default async function CoursePage({ params, searchParams }: { params: Pro
               <form action={submitAssignment.bind(null, a.id, `${path}?tab=assignments`)} className="mt-4 space-y-3">
                 <label className="sr-only" htmlFor={`c${a.id}`}>{t("assign.yours")}</label>
                 <textarea id={`c${a.id}`} name="content" required rows={3} placeholder={t("assign.placeholder")} defaultValue={a.content ?? ""} className="input resize-y" />
-                <button className="btn btn-primary btn-sm">{t(a.content ? "assign.update" : "assign.submit")}</button>
+                <SubmitButton className="btn btn-primary btn-sm">{t(a.content ? "assign.update" : "assign.submit")}</SubmitButton>
               </form>
             </li>
           ))}

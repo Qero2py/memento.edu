@@ -8,6 +8,7 @@ import { createSession, destroySession, getUser } from "./auth";
 import { isLocale, type Locale } from "./i18n";
 
 const str = (f: FormData, k: string) => String(f.get(k) ?? "").trim();
+const expired = (path: string): never => redirect(`/${path.startsWith("/id") ? "id" : "en"}/login?error=session`);
 const loc = (f: FormData): Locale => (isLocale(str(f, "locale")) ? (str(f, "locale") as Locale) : "en");
 
 export async function login(f: FormData) {
@@ -65,7 +66,7 @@ export async function resetPassword(f: FormData) {
 
 export async function toggleProgress(kind: "session" | "material" | "practicum", refId: number, path: string) {
   const user = await getUser();
-  if (!user) return;
+  if (!user) return expired(path);
   const removed = await sql`delete from progress where user_id = ${user.id} and kind = ${kind} and ref_id = ${refId}`;
   if (!removed.count) await sql`insert into progress(user_id, kind, ref_id) values(${user.id}, ${kind}, ${refId}) on conflict do nothing`;
   revalidatePath(path);
@@ -74,7 +75,8 @@ export async function toggleProgress(kind: "session" | "material" | "practicum",
 export async function submitAssignment(assignmentId: number, path: string, f: FormData) {
   const user = await getUser();
   const content = str(f, "content");
-  if (!user || !content) return;
+  if (!user) return expired(path);
+  if (!content) return;
   await sql`insert into submissions(assignment_id, user_id, content) values(${assignmentId}, ${user.id}, ${content})
     on conflict (assignment_id, user_id) do update set content = excluded.content, submitted_at = now()`;
   revalidatePath(path);
@@ -82,7 +84,7 @@ export async function submitAssignment(assignmentId: number, path: string, f: Fo
 
 export async function markAllRead(path: string) {
   const user = await getUser();
-  if (!user) return;
+  if (!user) return expired(path);
   await sql`update notifications set read = true where user_id = ${user.id}`;
   revalidatePath(path);
 }

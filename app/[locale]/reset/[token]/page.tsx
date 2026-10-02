@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { getT, isLocale, type Key } from "@/lib/i18n";
 import { resetPassword } from "@/lib/actions";
+import SubmitButton from "@/components/SubmitButton";
 import AuthShell from "@/components/AuthShell";
 import { Alert, Field } from "@/components/ui";
 
@@ -16,10 +17,10 @@ export default async function Reset({ params, searchParams }: { params: Promise<
       <form action={resetPassword} className="space-y-4">
         <input type="hidden" name="locale" value={locale} />
         <input type="hidden" name="token" value={token} />
-        {error && <Alert>{t(`err.${error}` as Key)}</Alert>}
+        {error && <Alert>{t((["token", "short", "mismatch"]).includes(error) ? (`err.${error}` as Key) : "err.fields")}</Alert>}
         <Field label={t("field.password")} name="password" type="password" autoComplete="new-password" />
         <Field label={t("field.confirm")} name="confirm" type="password" autoComplete="new-password" />
-        <button className="btn btn-primary w-full">{t("reset.submit")}</button>
+        <SubmitButton className="btn btn-primary w-full">{t("reset.submit")}</SubmitButton>
       </form>
     </AuthShell>
   );

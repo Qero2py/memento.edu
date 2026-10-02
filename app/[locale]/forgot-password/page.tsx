@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getT, isLocale } from "@/lib/i18n";
 import { forgotPassword } from "@/lib/actions";
+import SubmitButton from "@/components/SubmitButton";
 import AuthShell from "@/components/AuthShell";
 import { Alert, Field } from "@/components/ui";
 
@@ -24,7 +25,7 @@ export default async function Forgot({ params, searchParams }: { params: Promise
         <form action={forgotPassword} className="space-y-4">
           <input type="hidden" name="locale" value={locale} />
           <Field label={t("field.email")} name="email" type="email" autoComplete="email" />
-          <button className="btn btn-primary w-full">{t("forgot.submit")}</button>
+          <SubmitButton className="btn btn-primary w-full">{t("forgot.submit")}</SubmitButton>
         </form>
       )}
       <Link href={`/${locale}/login`} className="mt-6 inline-block text-sm font-semibold text-sage hover:underline">{t("forgot.back")}</Link>

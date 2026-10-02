@@ -4,6 +4,7 @@ import { fmt, getT, isLocale, pick } from "@/lib/i18n";
 import { requireUser } from "@/lib/auth";
 import { markAllRead } from "@/lib/actions";
 import { assignmentsFor, myCourses, nextSession, notificationsFor, upcomingEvents } from "@/lib/queries";
+import SubmitButton from "@/components/SubmitButton";
 import CourseCard from "@/components/CourseCard";
 import { AssignmentStatus } from "@/components/Status";
 import { Icon } from "@/components/ui";
@@ -95,7 +96,7 @@ export default async function Dashboard({ params }: { params: Promise<{ locale: 
           <section aria-labelledby="notif">
             <div className="mb-4 flex items-baseline justify-between gap-3">
               <h2 id="notif" className="h-section text-2xl">{t("dash.notif")}</h2>
-              {notes.some((n) => !n.read) && <form action={markAllRead.bind(null, path)}><button className="text-sm font-medium text-sage hover:underline">{t("dash.markread")}</button></form>}
+              {notes.some((n) => !n.read) && <form action={markAllRead.bind(null, path)}><SubmitButton className="inline-flex items-center gap-2 text-sm font-medium text-sage hover:underline">{t("dash.markread")}</SubmitButton></form>}
             </div>
             {notes.length ? (
               <ul className="card divide-y divide-line">
