@@ -1,5 +1,6 @@
 import { sql } from "../lib/db";
 import { seed } from "../lib/seed";
+import { ensureBucket, storageEnabled, BUCKET } from "../lib/storage";
 
 async function main() {
   if (!process.env.DATABASE_URL) {
@@ -12,6 +13,10 @@ async function main() {
   }
   await sql.file("db/schema.sql");
   console.log("Schema ready.");
+  if (storageEnabled()) {
+    try { await ensureBucket(); console.log(`Storage bucket "${BUCKET}" ready.`); }
+    catch (e: any) { console.warn("Could not prepare the storage bucket:", e?.message ?? e); }
+  } else console.log("File uploads are off (storage variables not set). Lecturers can still paste links.");
   const [{ n }] = await sql`select count(*)::int as n from users`;
   if (n === 0) {
     await seed(sql);

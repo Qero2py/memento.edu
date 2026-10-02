@@ -1,11 +1,12 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { fmt, getT, isLocale, pick, type Key } from "@/lib/i18n";
-import { requireUser } from "@/lib/auth";
+import { requireStudent } from "@/lib/auth";
 import { submitAssignment, toggleProgress } from "@/lib/actions";
 import type { Row } from "@/lib/queries";
 import { assignmentsFor, courseTotals, getCourse, isEnrolled, practicumsWithState, sessionsWithState } from "@/lib/queries";
 import SubmitButton from "@/components/SubmitButton";
+import { tt } from "@/lib/teachText";
 import { AssignmentStatus } from "@/components/Status";
 import { Icon, Progress, kindIcon } from "@/components/ui";
 
@@ -32,7 +33,7 @@ export default async function CoursePage({ params, searchParams }: { params: Pro
   const { tab: rawTab } = await searchParams;
   if (!isLocale(locale)) notFound();
   const t = getT(locale);
-  const user = await requireUser(locale);
+  const user = await requireStudent(locale);
   const course = await getCourse(code);
   if (!course || !(await isEnrolled(user.id, course.id))) notFound();
 
@@ -146,6 +147,7 @@ export default async function CoursePage({ params, searchParams }: { params: Pro
               </div>
               <p className="mt-3 text-ink-soft">{pick(a, "desc", locale)}</p>
               {a.content && <div className="mt-4 rounded-xl bg-sage-tint/60 p-4 text-sm"><p className="mb-1 font-semibold">{t("assign.yours")}</p><p className="whitespace-pre-wrap">{a.content}</p></div>}
+              {a.feedback && <div className="mt-3 rounded-xl border border-sage/30 p-4 text-sm"><p className="mb-1 font-semibold text-sage-deep">{tt(locale, "fb")}</p><p className="whitespace-pre-wrap">{a.feedback}</p></div>}
               <form action={submitAssignment.bind(null, a.id, `${path}?tab=assignments`)} className="mt-4 space-y-3">
                 <label className="sr-only" htmlFor={`c${a.id}`}>{t("assign.yours")}</label>
                 <textarea id={`c${a.id}`} name="content" required rows={3} placeholder={t("assign.placeholder")} defaultValue={a.content ?? ""} className="input resize-y" />

@@ -13,10 +13,10 @@ const loc = (f: FormData): Locale => (isLocale(str(f, "locale")) ? (str(f, "loca
 
 export async function login(f: FormData) {
   const l = loc(f);
-  const [user] = await sql`select id, password_hash from users where email = ${str(f, "email").toLowerCase()}`;
+  const [user] = await sql`select id, role, password_hash from users where email = ${str(f, "email").toLowerCase()}`;
   if (!user || !bcrypt.compareSync(String(f.get("password") ?? ""), user.password_hash)) redirect(`/${l}/login?error=invalid`);
   await createSession(user.id);
-  redirect(`/${l}/dashboard`);
+  redirect(`/${l}/${user.role === "lecturer" ? "teach" : "dashboard"}`);
 }
 
 export async function register(f: FormData) {
@@ -26,14 +26,19 @@ export async function register(f: FormData) {
   if (!name || !email) back("fields");
   if (pw.length < 8) back("short");
   if (pw !== String(f.get("confirm") ?? "")) back("mismatch");
+  const role = str(f, "role") === "lecturer" ? "lecturer" : "student";
+  const secret = process.env.LECTURER_CODE;
+  if (role === "lecturer" && secret && str(f, "code") !== secret) back("lecturercode");
   const taken = await sql`select 1 from users where email = ${email}`;
   if (taken.length) back("exists");
-  const [{ id }] = await sql`insert into users(name, email, password_hash, locale) values(${name}, ${email}, ${bcrypt.hashSync(pw, 10)}, ${l}) returning id`;
-  await sql`insert into enrollments(user_id, course_id) select ${id}, id from courses`; // demo: enroll in every course
+  const [{ id }] = await sql`insert into users(name, email, password_hash, role, locale) values(${name}, ${email}, ${bcrypt.hashSync(pw, 10)}, ${role}, ${l}) returning id`;
+  if (role === "student") await sql`insert into enrollments(user_id, course_id) select ${id}, id from courses`; // demo: students join every course
   await sql`insert into notifications(user_id, title_en, title_id, body_en, body_id)
-    values(${id}, 'Welcome to memento.edu', 'Selamat datang di memento.edu', 'Your courses are ready.', 'Mata kuliahmu sudah siap.')`;
+    values(${id}, 'Welcome to memento.edu', 'Selamat datang di memento.edu',
+      ${role === "lecturer" ? "Open Teaching to claim or create your courses." : "Your courses are ready."},
+      ${role === "lecturer" ? "Buka Mengajar untuk mengambil atau membuat mata kuliahmu." : "Mata kuliahmu sudah siap."})`;
   await createSession(id);
-  redirect(`/${l}/dashboard`);
+  redirect(`/${l}/${role === "lecturer" ? "teach" : "dashboard"}`);
 }
 
 export async function logout(f: FormData) {

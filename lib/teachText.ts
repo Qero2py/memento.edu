@@ -1,0 +1,46 @@
+// Text for the lecturer area. Kept separate from i18n.ts: [English, Indonesian] pairs.
+type L = "en" | "id";
+const T = {
+  "nav.teaching": ["Teaching", "Mengajar"],
+  "title": ["Teaching", "Mengajar"], "sub": ["Manage sessions, materials, assignments and grades.", "Kelola sesi, materi, tugas, dan nilai."],
+  "mycourses": ["Your courses", "Mata kuliahmu"],
+  "none": ["You aren't teaching any course yet. Claim one below or create a new one.", "Kamu belum mengajar mata kuliah apa pun. Ambil salah satu di bawah atau buat baru."],
+  "claim": ["Claim a course", "Ambil mata kuliah"], "claim.sub": ["These courses don't have a lecturer account yet.", "Mata kuliah ini belum punya akun dosen."],
+  "claim.btn": ["Claim", "Ambil"], "claim.none": ["Every course already has a lecturer.", "Semua mata kuliah sudah punya dosen."],
+  "create": ["Create a course", "Buat mata kuliah"], "create.btn": ["Create course", "Buat mata kuliah"],
+  "sessions": ["{n} sessions", "{n} sesi"], "assignments": ["{n} assignments", "{n} tugas"], "togr": ["{n} to grade", "{n} perlu dinilai"], "nograde": ["Nothing to grade", "Tidak ada yang perlu dinilai"],
+  "f.code": ["Course code", "Kode mata kuliah"], "f.title.en": ["Title (English)", "Judul (Inggris)"], "f.title.id": ["Title (Indonesian)", "Judul (Indonesia)"],
+  "f.desc.en": ["Description (English)", "Deskripsi (Inggris)"], "f.desc.id": ["Description (Indonesian)", "Deskripsi (Indonesia)"],
+  "f.sum.en": ["Summary (English)", "Ringkasan (Inggris)"], "f.sum.id": ["Summary (Indonesian)", "Ringkasan (Indonesia)"],
+  "f.credits": ["Credits", "SKS"], "f.lecturer": ["Lecturer name", "Nama dosen"], "f.date": ["Date", "Tanggal"], "f.due": ["Due date and time", "Tenggat (tanggal dan jam)"],
+  "f.kind": ["Type", "Jenis"], "f.url": ["Link (https://...)", "Tautan (https://...)"], "f.file": ["File", "Berkas"], "f.mtitle": ["Material title", "Judul materi"],
+  "f.opt": ["Both languages are optional, but fill at least one. An empty one copies the other.", "Isi minimal satu bahasa. Yang kosong akan menyalin bahasa lainnya."],
+  "mode.link": ["Paste a link", "Tempel tautan"], "mode.file": ["Upload a file", "Unggah berkas"],
+  "upload.off": ["File upload isn't set up yet, so paste a link instead.", "Unggah berkas belum diatur, jadi tempel tautan saja."],
+  "upload.hint": ["Up to 50 MB. PDF, Office files, images, zip, mp4.", "Maksimal 50 MB. PDF, file Office, gambar, zip, mp4."],
+  "save": ["Save changes", "Simpan perubahan"], "add": ["Add", "Tambah"], "delete": ["Delete", "Hapus"], "edit": ["Edit", "Ubah"], "back": ["All my courses", "Semua mataku"],
+  "tab.sessions": ["Sessions", "Sesi"], "tab.assignments": ["Assignments", "Tugas"], "tab.practicum": ["Practicum", "Praktikum"], "tab.info": ["Course info", "Info mata kuliah"],
+  "c.session": ["Delete this session and all of its materials?", "Hapus sesi ini beserta semua materinya?"], "c.material": ["Delete this material?", "Hapus materi ini?"],
+  "c.assignment": ["Delete this assignment and every submission?", "Hapus tugas ini beserta semua pengumpulan?"], "c.practicum": ["Delete this practicum task?", "Hapus tugas praktikum ini?"],
+  "s.add": ["Add a session", "Tambah sesi"], "s.none": ["No sessions yet. Add the first one.", "Belum ada sesi. Tambahkan yang pertama."],
+  "m.none": ["No materials yet.", "Belum ada materi."], "m.add": ["Add material", "Tambah materi"],
+  "a.add": ["Post an assignment", "Buat tugas"], "a.none": ["No assignments yet.", "Belum ada tugas."], "a.subs": ["{n} of {total} submitted", "{n} dari {total} terkumpul"],
+  "a.nosubs": ["No submissions yet.", "Belum ada pengumpulan."], "a.at": ["Submitted {date}", "Dikumpulkan {date}"], "a.due": ["Due {date}", "Tenggat {date}"],
+  "g.grade": ["Grade (0-100)", "Nilai (0-100)"], "g.fb": ["Feedback", "Umpan balik"], "g.save": ["Save grade", "Simpan nilai"], "g.is": ["Graded: {g}", "Nilai: {g}"],
+  "p.add": ["Add a practicum task", "Tambah tugas praktikum"], "p.none": ["No practicum tasks yet.", "Belum ada tugas praktikum."],
+  "e.url": ["Enter a valid link starting with https://", "Masukkan tautan yang valid dan diawali https://"], "e.file": ["Choose a file first.", "Pilih berkas terlebih dahulu."],
+  "e.type": ["That file type isn't allowed.", "Jenis berkas itu tidak diizinkan."], "e.size": ["That file is larger than 50 MB.", "Berkas itu lebih dari 50 MB."],
+  "e.up": ["The upload failed. Please try again.", "Unggahan gagal. Silakan coba lagi."], "e.title": ["Give the material a title.", "Beri judul pada materi."],
+  "e.code": ["That course code is already used.", "Kode mata kuliah itu sudah dipakai."], "e.codefmt": ["Use 2 to 20 letters, numbers, - or _ for the code.", "Gunakan 2 sampai 20 huruf, angka, - atau _ untuk kode."],
+  "e.fields": ["Please fill in the required fields.", "Mohon isi kolom yang wajib."],
+  "kind.pdf": ["Reading", "Bacaan"], "kind.slide": ["Slides", "Slide"], "kind.video": ["Video", "Video"], "kind.link": ["Link", "Tautan"],
+  "fb": ["Lecturer feedback", "Umpan balik dosen"],
+  "role.label": ["I'm signing up as", "Saya mendaftar sebagai"], "role.student": ["Student", "Mahasiswa"], "role.lecturer": ["Lecturer", "Dosen"],
+  "role.code": ["Lecturer access code", "Kode akses dosen"], "role.code.hint": ["Needed only for lecturer accounts. Ask your administrator.", "Hanya untuk akun dosen. Tanyakan ke admin."],
+  "err.lecturercode": ["That lecturer access code is incorrect.", "Kode akses dosen salah."],
+} as const satisfies Record<string, readonly [string, string]>;
+
+export type TKey = keyof typeof T;
+export const tt = (l: L, k: TKey, vars: Record<string, string | number> = {}) =>
+  T[k][l === "id" ? 1 : 0].replace(/\{(\w+)\}/g, (_, v) => String(vars[v] ?? ""));
+export const ttAll = (l: L) => Object.fromEntries(Object.keys(T).map((k) => [k, tt(l, k as TKey)])) as Record<TKey, string>;

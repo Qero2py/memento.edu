@@ -66,7 +66,7 @@ export async function practicumsWithState(courseId: number, userId: number): Pro
 }
 
 export async function assignmentsFor(userId: number, courseId?: number): Promise<Row[]> {
-  const rows = await sql<Row[]>`select a.*, c.code, c.title_en as course_title_en, c.title_id as course_title_id, s.content, s.grade, s.submitted_at
+  const rows = await sql<Row[]>`select a.*, c.code, c.title_en as course_title_en, c.title_id as course_title_id, s.content, s.grade, s.feedback, s.submitted_at
     from assignments a join courses c on c.id = a.course_id
     join enrollments e on e.course_id = c.id and e.user_id = ${userId}
     left join submissions s on s.assignment_id = a.id and s.user_id = ${userId}

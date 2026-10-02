@@ -92,3 +92,9 @@ create table if not exists notifications (
 create index if not exists idx_sessions_course on course_sessions(course_id);
 create index if not exists idx_materials_session on materials(session_id);
 create index if not exists idx_notifications_user on notifications(user_id, created_at desc);
+
+-- Lecturer features (safe to re-run)
+alter table courses add column if not exists lecturer_id int references users(id) on delete set null;
+alter table materials add column if not exists storage_path text;
+alter table submissions add column if not exists feedback text;
+create index if not exists idx_courses_lecturer on courses(lecturer_id);

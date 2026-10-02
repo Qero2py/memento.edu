@@ -35,3 +35,17 @@ export async function requireUser(locale: string): Promise<User> {
   if (!user) redirect(`/${locale}/login`);
   return user;
 }
+
+// Students only: lecturers are sent to their own area.
+export async function requireStudent(locale: string): Promise<User> {
+  const user = await requireUser(locale);
+  if (user.role === "lecturer") redirect(`/${locale}/teach`);
+  return user;
+}
+
+// Lecturers only: students are sent back to their dashboard.
+export async function requireLecturer(locale: string): Promise<User> {
+  const user = await requireUser(locale);
+  if (user.role !== "lecturer") redirect(`/${locale}/dashboard`);
+  return user;
+}

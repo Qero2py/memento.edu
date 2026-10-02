@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { fmt, getT, isLocale, pick } from "@/lib/i18n";
-import { requireUser } from "@/lib/auth";
+import { requireStudent } from "@/lib/auth";
 import { markAllRead } from "@/lib/actions";
 import { assignmentsFor, myCourses, nextSession, notificationsFor, upcomingEvents } from "@/lib/queries";
 import SubmitButton from "@/components/SubmitButton";
@@ -15,7 +15,7 @@ export default async function Dashboard({ params }: { params: Promise<{ locale: 
   const { locale } = await params;
   if (!isLocale(locale)) notFound();
   const t = getT(locale);
-  const user = await requireUser(locale);
+  const user = await requireStudent(locale);
   const hour = Number(new Intl.DateTimeFormat("en-GB", { timeZone: "Asia/Jakarta", hour: "numeric", hour12: false }).format(new Date()));
   const greet = hour < 11 ? "greet.morning" : hour < 18 ? "greet.afternoon" : "greet.evening";
   const first = user.name.split(" ")[0];
