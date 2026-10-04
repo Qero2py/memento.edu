@@ -5,6 +5,7 @@ import { requireStudent } from "@/lib/auth";
 import { markAllRead } from "@/lib/actions";
 import { assignmentsFor, myCourses, nextSession, notificationsFor, upcomingEvents } from "@/lib/queries";
 import SubmitButton from "@/components/SubmitButton";
+import { tt } from "@/lib/teachText";
 import CourseCard from "@/components/CourseCard";
 import { AssignmentStatus } from "@/components/Status";
 import { Icon } from "@/components/ui";
@@ -46,7 +47,7 @@ export default async function Dashboard({ params }: { params: Promise<{ locale: 
       </section>
 
       <div className="mt-10 grid gap-10 xl:grid-cols-[1.6fr_1fr]">
-        <div className="space-y-10">
+        <div className="min-w-0 space-y-10">
           <section aria-labelledby="courses">
             <h2 id="courses" className="h-section mb-4 text-2xl">{t("dash.courses")}</h2>
             {courses.length ? <ul className="grid gap-4 sm:grid-cols-2">{courses.map((c) => <li key={c.id}><CourseCard c={c} locale={locale} /></li>)}</ul> : <p className="text-ink-soft">{t("dash.nocourses")}</p>}
@@ -72,7 +73,7 @@ export default async function Dashboard({ params }: { params: Promise<{ locale: 
           </section>
         </div>
 
-        <div className="space-y-10">
+        <div className="min-w-0 space-y-10">
           <section aria-labelledby="sched">
             <h2 id="sched" className="h-section mb-4 text-2xl">{t("dash.schedule")}</h2>
             {events.length ? (
@@ -85,7 +86,7 @@ export default async function Dashboard({ params }: { params: Promise<{ locale: 
                     </div>
                     <div className="min-w-0">
                       <p className="truncate font-medium">{pick(e, "title", locale)}</p>
-                      <p className="text-sm text-ink-soft">{fmt(e.starts_at, locale, time)} - {fmt(e.ends_at, locale, time)}, {e.room}</p>
+                      <p className="text-sm text-ink-soft">{fmt(e.starts_at, locale, time)} - {fmt(e.ends_at, locale, time)}{e.room ? `, ${e.room}` : ""}{e.kind === "practicum" ? ` (${tt(locale, "kind.practicum")})` : ""}</p>
                     </div>
                   </li>
                 ))}

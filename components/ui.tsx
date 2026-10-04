@@ -29,10 +29,10 @@ export const kindIcon = (k: string) => ({ pdf: "file", slide: "slide", video: "p
 
 export function Logo({ locale, light = false }: { locale: Locale; light?: boolean }) {
   return (
-    <Link href={`/${locale}`} className="inline-flex items-center gap-2.5" aria-label="memento.edu">
+    <Link href={`/${locale}`} className="inline-flex shrink-0 items-center gap-2 sm:gap-2.5" aria-label="memento.edu">
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src="/logo.png" alt="" width={38} height={21} className={light ? "brightness-0 invert" : ""} />
-      <span className="font-serif text-[1.35rem] font-semibold tracking-tight">
+      <img src="/logo.png" alt="" width={38} height={21} className={`h-4 w-auto sm:h-[21px] ${light ? "brightness-0 invert" : ""}`} />
+      <span className="font-serif text-[1.05rem] font-semibold tracking-tight sm:text-[1.35rem]">
         memento<span className={light ? "text-sage-mid" : "text-sage"}>.edu</span>
       </span>
     </Link>

@@ -29,6 +29,7 @@ const courseOfSession = (id: number) => one(sql`select course_id from course_ses
 const courseOfMaterial = (id: number) => one(sql`select s.course_id from materials m join course_sessions s on s.id = m.session_id where m.id = ${id}`);
 const courseOfAssignment = (id: number) => one(sql`select course_id from assignments where id = ${id}`);
 const courseOfPracticum = (id: number) => one(sql`select course_id from practicums where id = ${id}`);
+const courseOfEvent = (id: number) => one(sql`select course_id from events where id = ${id}`);
 const courseOfSubmission = (id: number) => one(sql`select a.course_id from submissions s join assignments a on a.id = s.assignment_id where s.id = ${id}`);
 
 /* ---------- courses ---------- */
@@ -205,5 +206,48 @@ export async function deletePracticum(practicumId: number, path: string) {
   await sql`delete from progress where kind = 'practicum' and ref_id = ${practicumId}`;
   await sql`delete from practicums where id = ${practicumId}`;
   await sql`update practicums p set num = r.n from (select id, row_number() over (order by num, id)::int as n from practicums where course_id = ${cid}) r where p.id = r.id`;
+  refresh(path);
+}
+
+/* ---------- weekly schedule ---------- */
+const hhmm = (v: string) => (/^([01]\d|2[0-3]):[0-5]\d$/.test(v) ? v : null);
+// A weekly class is stored as its next occurrence; the dashboard rolls it forward every week.
+function nextOccurrence(day: number, start: string, end: string): [string, string] {
+  const jakartaNow = Date.now() + 7 * 3600000;
+  const diff = ((day % 7) - new Date(jakartaNow).getUTCDay() + 7) % 7;
+  const date = new Date(jakartaNow + diff * 86400000).toISOString().slice(0, 10);
+  return [`${date}T${start}:00+07:00`, `${date}T${end}:00+07:00`];
+}
+function readSlot(f: FormData, path: string) {
+  const day = parseInt(str(f, "day")), start = hhmm(str(f, "start")), end = hhmm(str(f, "end"));
+  if (!(day >= 1 && day <= 7) || !start || !end) return null;
+  if (end <= start) redirect(`${path.split("?")[0]}?tab=schedule&e=time`);
+  const kind = str(f, "kind") === "practicum" ? "practicum" : "lecture";
+  const [startsAt, endsAt] = nextOccurrence(day, start, end);
+  return { kind, room: str(f, "room").slice(0, 60), startsAt, endsAt };
+}
+
+export async function addEvent(courseId: number, path: string, f: FormData) {
+  const u = await lecturer(path);
+  if (!(await owns(u.id, courseId))) return;
+  const s = readSlot(f, path);
+  if (!s) return;
+  await sql`insert into events(course_id, starts_at, ends_at, room, kind) values(${courseId}, ${s.startsAt}, ${s.endsAt}, ${s.room}, ${s.kind})`;
+  refresh(path);
+}
+
+export async function updateEvent(eventId: number, path: string, f: FormData) {
+  const u = await lecturer(path);
+  if (!(await owns(u.id, await courseOfEvent(eventId)))) return;
+  const s = readSlot(f, path);
+  if (!s) return;
+  await sql`update events set starts_at = ${s.startsAt}, ends_at = ${s.endsAt}, room = ${s.room}, kind = ${s.kind} where id = ${eventId}`;
+  refresh(path);
+}
+
+export async function deleteEvent(eventId: number, path: string) {
+  const u = await lecturer(path);
+  if (!(await owns(u.id, await courseOfEvent(eventId)))) return;
+  await sql`delete from events where id = ${eventId}`;
   refresh(path);
 }

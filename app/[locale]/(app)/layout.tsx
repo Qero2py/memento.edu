@@ -54,7 +54,7 @@ export default async function AppLayout({ children, params }: { children: ReactN
           </div>
         </div>
       </aside>
-      <main className="mx-auto w-full max-w-5xl px-5 py-8 lg:px-10 lg:py-12">
+      <main className="mx-auto w-full min-w-0 max-w-5xl px-5 py-8 lg:px-10 lg:py-12">
         {children}
         <form action={logout} className="mt-12 lg:hidden"><input type="hidden" name="locale" value={locale} /><button className="btn btn-ghost btn-sm">{t("nav.logout")}</button></form>
       </main>

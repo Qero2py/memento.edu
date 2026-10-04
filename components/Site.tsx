@@ -9,21 +9,21 @@ export async function SiteHeader({ locale }: { locale: Locale }) {
   const user = await getUser();
   return (
     <header className="sticky top-0 z-30 border-b border-line/70 bg-paper/85 backdrop-blur">
-      <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-3.5">
+      <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-x-2 gap-y-2 px-3 py-3 sm:gap-4 sm:px-5 sm:py-3.5">
         <Logo locale={locale} />
         <nav aria-label="Main" className="hidden items-center gap-7 text-sm font-medium text-ink-soft md:flex">
           <a href="#about" className="hover:text-ink">{t("nav.about")}</a>
           <a href="#courses" className="hover:text-ink">{t("nav.courses")}</a>
           <a href="#features" className="hover:text-ink">{t("nav.features")}</a>
         </nav>
-        <div className="flex items-center gap-3">
-          <LangSwitch locale={locale} label={t("lang.switch")} className="hidden sm:inline-flex" />
+        <div className="ml-auto flex items-center gap-1.5 sm:gap-3">
+          <LangSwitch locale={locale} label={t("lang.switch")} />
           {user ? (
             <Link href={`/${locale}/dashboard`} className="btn btn-primary btn-sm">{t("nav.dashboard")}</Link>
           ) : (
             <>
-              <Link href={`/${locale}/login`} className="btn btn-ghost btn-sm">{t("nav.login")}</Link>
-              <Link href={`/${locale}/register`} className="btn btn-primary btn-sm">{t("nav.register")}</Link>
+              <Link href={`/${locale}/login`} className="btn btn-ghost btn-sm max-sm:border-transparent max-sm:bg-transparent max-sm:px-1.5">{t("nav.login")}</Link>
+              <Link href={`/${locale}/register`} className="btn btn-primary btn-sm max-sm:px-3">{t("nav.register")}</Link>
             </>
           )}
         </div>

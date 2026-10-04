@@ -34,3 +34,15 @@ export const teachPracticums = (courseId: number): Promise<Row[]> => sql<Row[]>`
 // Dates are entered in Jakarta time (UTC+7).
 export const toDateInput = (iso: string) => new Date(iso).toLocaleDateString("sv-SE", { timeZone: "Asia/Jakarta" });
 export const toDateTimeInput = (iso: string) => new Date(iso).toLocaleString("sv-SE", { timeZone: "Asia/Jakarta" }).slice(0, 16).replace(" ", "T");
+
+// A weekly class time, read back from the stored first occurrence (Jakarta time). day: 1 = Monday ... 7 = Sunday.
+export const teachEvents = async (courseId: number): Promise<Row[]> => {
+  const rows = await sql<Row[]>`select * from events where course_id = ${courseId}`;
+  return rows
+    .map((e) => {
+      const wd = new Date(new Date(e.starts_at).getTime() + 7 * 3600000).getUTCDay();
+      const hm = (iso: string) => new Date(iso).toLocaleTimeString("en-GB", { timeZone: "Asia/Jakarta", hour: "2-digit", minute: "2-digit", hour12: false });
+      return { ...e, day: wd === 0 ? 7 : wd, start: hm(e.starts_at), end: hm(e.ends_at) };
+    })
+    .sort((a, b) => a.day - b.day || a.start.localeCompare(b.start));
+};
