@@ -18,7 +18,9 @@ export async function GET() {
     await sql`select 1`;
     const [{ users, courses }] = await sql`select (select count(*) from users)::int as users, (select count(*) from courses)::int as courses`;
     return NextResponse.json({ ok: true, ms: Date.now() - t0, users, courses, ...info });
-  } catch (e: any) {
-    return NextResponse.json({ ok: false, ms: Date.now() - t0, error: e?.code ?? e?.name, message: String(e?.message ?? e).slice(0, 200), ...info }, { status: 500 });
+  } catch (e: unknown) {
+    const error = e instanceof Error ? e : new Error(String(e));
+    const code = typeof e === "object" && e !== null && "code" in e ? String(e.code) : error.name;
+    return NextResponse.json({ ok: false, ms: Date.now() - t0, error: code, message: error.message.slice(0, 200), ...info }, { status: 500 });
   }
 }

@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { sql } from "./db";
 import { getUser, type User } from "./auth";
 import { ALLOWED_EXT, MAX_UPLOAD_MB, publicUrl, removeFiles, signedUpload, storageEnabled } from "./storage";
+import { isCourseOwner } from "./authPolicy";
 
 const str = (f: FormData, k: string) => String(f.get(k) ?? "").trim();
 const lang = (path: string) => (path.startsWith("/id") ? "id" : "en");
@@ -23,14 +24,14 @@ async function lecturer(path: string): Promise<User> {
   return u;
 }
 const owns = async (uid: number, courseId?: number) =>
-  !!courseId && (await sql`select 1 from courses where id = ${courseId} and lecturer_id = ${uid}`).length > 0;
-const one = async (q: PromiseLike<any[]>) => (await q)[0]?.course_id as number | undefined;
-const courseOfSession = (id: number) => one(sql`select course_id from course_sessions where id = ${id}`);
-const courseOfMaterial = (id: number) => one(sql`select s.course_id from materials m join course_sessions s on s.id = m.session_id where m.id = ${id}`);
-const courseOfAssignment = (id: number) => one(sql`select course_id from assignments where id = ${id}`);
-const courseOfPracticum = (id: number) => one(sql`select course_id from practicums where id = ${id}`);
-const courseOfEvent = (id: number) => one(sql`select course_id from events where id = ${id}`);
-const courseOfSubmission = (id: number) => one(sql`select a.course_id from submissions s join assignments a on a.id = s.assignment_id where s.id = ${id}`);
+  !!courseId && isCourseOwner(uid, (await sql<{ lecturer_id: number | null }[]>`select lecturer_id from courses where id = ${courseId}`)[0]?.lecturer_id);
+const one = async (q: PromiseLike<{ course_id: number }[]>) => (await q)[0]?.course_id;
+const courseOfSession = (id: number) => one(sql<{ course_id: number }[]>`select course_id from course_sessions where id = ${id}`);
+const courseOfMaterial = (id: number) => one(sql<{ course_id: number }[]>`select s.course_id from materials m join course_sessions s on s.id = m.session_id where m.id = ${id}`);
+const courseOfAssignment = (id: number) => one(sql<{ course_id: number }[]>`select course_id from assignments where id = ${id}`);
+const courseOfPracticum = (id: number) => one(sql<{ course_id: number }[]>`select course_id from practicums where id = ${id}`);
+const courseOfEvent = (id: number) => one(sql<{ course_id: number }[]>`select course_id from events where id = ${id}`);
+const courseOfSubmission = (id: number) => one(sql<{ course_id: number }[]>`select a.course_id from submissions s join assignments a on a.id = s.assignment_id where s.id = ${id}`);
 
 /* ---------- courses ---------- */
 export async function claimCourse(courseId: number, path: string) {

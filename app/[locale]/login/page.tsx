@@ -20,7 +20,7 @@ export default async function Login({ params, searchParams }: { params: Promise<
     <AuthShell locale={locale} title={t("login.title")} sub={t("login.sub")}>
       <form action={login} className="space-y-4">
         <input type="hidden" name="locale" value={locale} />
-        {error && <Alert>{error === "session" ? et(locale, "session") : t("err.invalid")}</Alert>}
+        {error && <Alert>{error === "session" ? et(locale, "session") : error === "throttle" ? (locale === "en" ? "Too many attempts. Please wait before trying again." : "Terlalu banyak percobaan. Tunggu sebelum mencoba lagi.") : t("err.invalid")}</Alert>}
         {reset && <Alert tone="ok">{t("reset.done")}</Alert>}
         <Field label={t("field.email")} name="email" type="email" autoComplete="email" />
         <div>

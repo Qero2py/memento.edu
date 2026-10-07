@@ -17,6 +17,11 @@ create table if not exists reset_tokens (
   user_id int not null references users(id) on delete cascade,
   expires_at timestamptz not null
 );
+create table if not exists auth_rate_limits (
+  key text primary key,
+  attempts int not null,
+  window_started_at timestamptz not null
+);
 create table if not exists courses (
   id serial primary key,
   code text unique not null,
@@ -92,9 +97,18 @@ create table if not exists notifications (
 create index if not exists idx_sessions_course on course_sessions(course_id);
 create index if not exists idx_materials_session on materials(session_id);
 create index if not exists idx_notifications_user on notifications(user_id, created_at desc);
+create index if not exists idx_auth_sessions_user on auth_sessions(user_id);
+create index if not exists idx_reset_tokens_user on reset_tokens(user_id);
+create index if not exists idx_enrollments_course on enrollments(course_id);
+create index if not exists idx_assignments_course on assignments(course_id);
+create index if not exists idx_submissions_user on submissions(user_id);
+create index if not exists idx_practicums_course on practicums(course_id);
+create index if not exists idx_events_course on events(course_id);
 
 -- Lecturer features (safe to re-run)
 alter table courses add column if not exists lecturer_id int references users(id) on delete set null;
 alter table materials add column if not exists storage_path text;
 alter table submissions add column if not exists feedback text;
 create index if not exists idx_courses_lecturer on courses(lecturer_id);
+create index if not exists idx_auth_sessions_expiry on auth_sessions(expires_at);
+create index if not exists idx_auth_rate_limits_window on auth_rate_limits(window_started_at);

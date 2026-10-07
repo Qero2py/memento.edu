@@ -1,6 +1,8 @@
 import { getT, type Locale } from "@/lib/i18n";
 
-export function AssignmentStatus({ a, locale }: { a: Record<string, any>; locale: Locale }) {
+type AssignmentStatusData = { grade?: number | null; submitted_at?: string | null; overdue?: boolean };
+
+export function AssignmentStatus({ a, locale }: { a: AssignmentStatusData; locale: Locale }) {
   const t = getT(locale);
   const [text, cls] =
     a.grade != null ? [t("status.graded", { g: a.grade }), "bg-sage text-white"] :

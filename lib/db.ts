@@ -23,5 +23,5 @@ const options = {
   },
 };
 
-const g = globalThis as unknown as { __sql?: postgres.Sql<any> };
-export const sql: postgres.Sql<any> = g.__sql ?? (g.__sql = url ? postgres(url, options) : postgres(options));
+const g = globalThis as unknown as { __sql?: postgres.Sql };
+export const sql: postgres.Sql = g.__sql ?? (g.__sql = url ? postgres(url, options) : postgres(options));

@@ -44,10 +44,10 @@ const TIMETABLE: [string, number, number, number, number, number, string][] = [
   ["03045058", 4, 14, 40, 17, 10, "FT-305 / Lt 305"],
 ];
 
-export async function seed(sql: postgres.Sql<any>) {
+export async function seed(sql: postgres.Sql) {
   const hash = bcrypt.hashSync("memento123", 10);
-  await sql.begin(async (tx: any) => {
-    const id = async (q: PromiseLike<any[]>) => (await q)[0].id as number;
+  await sql.begin(async (tx) => {
+    const id = async (q: PromiseLike<{ id: number }[]>) => (await q)[0].id;
 
     const student = await id(tx`insert into users(name,email,password_hash,locale) values('Ahmeth Maulana Ishaq','ahmeth@memento.edu',${hash},'id') returning id`);
 

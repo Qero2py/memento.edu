@@ -18,9 +18,13 @@ export const getUser = cache(async (): Promise<User | null> => {
 });
 
 export async function createSession(userId: number) {
+  const jar = await cookies();
+  const previousToken = jar.get(COOKIE)?.value;
+  if (previousToken) await sql`delete from auth_sessions where token = ${previousToken}`;
+  await sql`delete from auth_sessions where expires_at <= now()`;
   const token = randomBytes(32).toString("hex");
   await sql`insert into auth_sessions(token, user_id, expires_at) values(${token}, ${userId}, now() + interval '7 days')`;
-  (await cookies()).set(COOKIE, token, { httpOnly: true, sameSite: "lax", secure: process.env.NODE_ENV === "production", path: "/", maxAge: WEEK });
+  jar.set(COOKIE, token, { httpOnly: true, sameSite: "lax", secure: process.env.NODE_ENV === "production", path: "/", maxAge: WEEK });
 }
 
 export async function destroySession() {

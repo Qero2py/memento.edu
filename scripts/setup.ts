@@ -8,14 +8,14 @@ async function main() {
     process.exit(1);
   }
   if (process.argv.includes("--reset")) {
-    await sql`drop table if exists notifications, events, progress, practicums, submissions, assignments, materials, course_sessions, enrollments, courses, reset_tokens, auth_sessions, users cascade`;
+    await sql`drop table if exists notifications, events, progress, practicums, submissions, assignments, materials, course_sessions, enrollments, courses, auth_rate_limits, reset_tokens, auth_sessions, users cascade`;
     console.log("Dropped all tables.");
   }
   await sql.file("db/schema.sql");
   console.log("Schema ready.");
   if (storageEnabled()) {
     try { await ensureBucket(); console.log(`Storage bucket "${BUCKET}" ready.`); }
-    catch (e: any) { console.warn("Could not prepare the storage bucket:", e?.message ?? e); }
+    catch (e: unknown) { console.warn("Could not prepare the storage bucket:", e instanceof Error ? e.message : String(e)); }
   } else console.log("File uploads are off (storage variables not set). Lecturers can still paste links.");
   const [{ n }] = await sql`select count(*)::int as n from users`;
   if (n === 0) {

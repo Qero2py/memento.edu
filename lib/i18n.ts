@@ -31,7 +31,7 @@ const M = {
   "register.title": ["Create your account", "Buat akunmu"], "register.sub": ["Join your courses in a minute.", "Bergabung ke mata kuliahmu dalam semenit."],
   "register.submit": ["Create account", "Buat akun"], "register.have": ["Already have an account?", "Sudah punya akun?"],
   "forgot.title": ["Reset your password", "Atur ulang kata sandi"], "forgot.sub": ["Enter your email and we'll create a reset link.", "Masukkan emailmu dan kami buatkan tautan reset."],
-  "forgot.submit": ["Create reset link", "Buat tautan reset"], "forgot.demo": ["Demo mode: no email is sent, so the link appears here.", "Mode demo: email tidak dikirim, jadi tautan muncul di sini."],
+  "forgot.submit": ["Create reset link", "Buat tautan reset"], "forgot.demo": ["Demo mode: no email is sent, so use the reset form below.", "Mode demo: email tidak dikirim, jadi gunakan formulir reset di bawah."],
   "forgot.sent": ["If that email is registered, a reset link is ready.", "Jika email terdaftar, tautan reset sudah siap."],
   "forgot.open": ["Open reset link", "Buka tautan reset"], "forgot.back": ["Back to log in", "Kembali ke halaman masuk"],
   "reset.title": ["Choose a new password", "Pilih kata sandi baru"], "reset.submit": ["Save new password", "Simpan kata sandi baru"],
@@ -78,7 +78,7 @@ export function getT(locale: Locale) {
   return (key: Key, vars: Record<string, string | number> = {}) =>
     M[key][i].replace(/\{(\w+)\}/g, (_, k) => String(vars[k] ?? ""));
 }
-export const pick = (row: Record<string, any>, field: string, locale: Locale): string => row[`${field}_${locale}`];
+export const pick = (row: Record<string, unknown>, field: string, locale: Locale): string => String(row[`${field}_${locale}`] ?? "");
 export function fmt(iso: string, locale: Locale, opts: Intl.DateTimeFormatOptions) {
   return new Intl.DateTimeFormat(locale === "id" ? "id-ID" : "en-GB", { timeZone: "Asia/Jakarta", ...opts }).format(new Date(iso));
 }
